@@ -1,7 +1,39 @@
 
 from lxml import html
 
-def parse_header(review):
+
+def parse_header(response):
+        header = {}
+        name_line = response.xpath(
+            "//div[contains(@class,'Wrapper')]/div[1]/div[1]/div[2]//text()").getall()
+        header['last'] = name_line[0]
+        header['first'] = name_line[2]
+        header['department'] = name_line[4]
+        header['college'] = name_line[8]
+
+        avggrade_line = response.xpath(
+            "//div[contains(@class,'Wrapper')]/div[1]/div[1]/div[1]//text()").getall()
+        header['grade'] = float(avggrade_line[0])
+        header['total_ratings'] = int(avggrade_line[5])
+
+        stats_line = response.xpath(
+            "//div[contains(@class,'Wrapper')]/div[1]/div[1]/div[3]//text()").getall()
+        header['would_take_again'] = stats_line[0]
+        header['difficulty'] = float(stats_line[2])
+
+        tags_line = response.xpath(
+            "//div[contains(@class,'Wrapper')]/div[1]/div[1]/div[5]//text()").getall()
+        header['tags'] = tags_line[3:]
+
+        most_helpful_line = response.xpath(
+            "//div[contains(@class,'Wrapper')]/div[1]/div[2]/div[1]//text()").getall()
+        header['date'] = most_helpful_line[2]
+        header['comment'] = most_helpful_line[3]
+        header['upvotes'] = int(most_helpful_line[5])
+        header['downvotes'] = int(most_helpful_line[7])
+        return header
+
+def parse_review_header(review):
     out = {}
     review = review.xpath("./div/div")[2]
     review = review.xpath("./div")[0]
@@ -56,15 +88,17 @@ def parse_footer(review):
             'downvotes': r[3]  }
     return {}
 
-def parse_review(review):
-    tree = html.fromstring(review)
+def parse_review(response):
+    review = response.xpath(
+        "//div[contains(@class,'Wrapper')]/div[4]").getall()
+    tree = html.fromstring(review[0])
     comments = tree.xpath("//ul")
     comments = comments[1]
     reviews = []
     for comment in comments:
         try:
             review = {}
-            review['header'] = parse_header(comment)
+            review['header'] = parse_review_header(comment)
             review['score'] = parse_score(comment)
             review['info'] = parse_info(comment)
             review['comment'] = parse_comment(comment)
