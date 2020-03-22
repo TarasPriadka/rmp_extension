@@ -9,10 +9,20 @@ class RMPSpider(scrapy.Spider):
     def start_requests(self):
         names = ["Manish Goel", "Dalia Garbacea", "Lana Sheridan"]
         for name in names:
-            url = parser.url_parser.create_url(name)
-            yield scrapy.Request(url=url, callback=self.parse)
+            url = parser.url_parser.create_rmp_url(name,'De Anza')
+            yield scrapy.Request(url=url, callback=self.parseRMP)
 
-    def parse(self, response):
+
+    def parseRMP(self, response):
+            urls = response.xpath(
+                "//body//ul[contains(@class,'listing')]//@href").getall()
+
+            urls = ["https://www.ratemyprofessors.com/" + url for url in urls]
+            for url in urls:
+                yield scrapy.Request(url, callback=self.parse_teachers)
+
+
+    def parseGoogle(self, response):
         links = response.xpath("//body/div//@href").getall()
         links = [url if 'ratemyprofessor' in url else '' for url in links]
         links = list(filter(lambda i: i != '' and 'ShowRatings' in i, links))

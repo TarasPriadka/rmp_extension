@@ -12,7 +12,16 @@ def reconstruct_url(in_url):
 
     return url
 
-def create_url(name):
+def create_rmp_url(name, school):
+    # https://www.ratemyprofessors.com/search.jsp?query=julie+wilson+de+anza
     name = name.lower()
-    args = name.split(' ') + ['rate', 'my', 'professor']
+    school = school.lower()
+    args = name.split(' ') + school.split(' ')
+    return f"https://www.ratemyprofessors.com/search.jsp?query={'+'.join(args)}"
+
+
+def create_url(name, school):
+    name = name.lower()
+    school = school.lower()
+    args = name.split(' ') + school.split(' ') + ['rate', 'my', 'professor']
     return f"https://www.google.com/search?client=firefox-b-1-d&q={'+'.join(args)}"
