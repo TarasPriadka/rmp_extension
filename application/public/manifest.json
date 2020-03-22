@@ -1,0 +1,11 @@
+{
+  "manifest_version": 2,
+  "name": "Example",
+  "version": "1.0",
+  "description": "Extension made with React.",
+  "browser_action": {
+    "default_icon": "galaxy.png",
+    "default_title": "Extension",
+    "default_popup": "index.html"
+  }
+}
