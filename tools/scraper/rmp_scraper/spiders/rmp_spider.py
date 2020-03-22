@@ -7,11 +7,6 @@ class RMPSpider(scrapy.Spider):
     name = "rmp"
     count = 0
     def start_requests(self):
-        # urls = [
-        #     'https://www.ratemyprofessors.com/ShowRatings.jsp?tid=117890',
-        #     'https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1836438',
-        #     'https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1149395'
-        # ]
         names = ["Manish Goel", "Dalia Garbacea", "Lana Sheridan"]
         for name in names:
             url = parser.url_parser.create_url(name)
