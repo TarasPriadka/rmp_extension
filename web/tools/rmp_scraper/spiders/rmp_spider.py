@@ -7,7 +7,7 @@ class RMPSpider(scrapy.Spider):
     name = "rmp"
     count = 0
     def start_requests(self):
-        names = ["Manish Goel", "Dalia Garbacea", "Lana Sheridan"]
+        names = ["Manish Goel"]
         for name in names:
             url = parser.url_parser.create_rmp_url(name,'De Anza')
             yield scrapy.Request(url=url, callback=self.parseRMP)
@@ -38,7 +38,7 @@ class RMPSpider(scrapy.Spider):
         teacher_info['header'] = parser.review_parser.parse_header(response)
         teacher_info['reviews'] = parser.review_parser.parse_review(response)
 
-        filename = f'rmp{self.count}.json'
+        filename = f"out/rmp_{teacher_info['header']['last'].lower()}_{teacher_info['header']['first'].lower()}.json"
         self.count += 1
         with open(filename, 'w') as f:
             f.write(json.dumps(teacher_info, indent=4))
