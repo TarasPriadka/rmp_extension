@@ -1,10 +1,8 @@
-from flask import Flask
-from markupsafe import escape
-from flask import request
-from flask import abort
+from flask import Flask, request, abort, jsonify
+from tools.rmp_scraper import rmp_spider_run
+
 
 app = Flask(__name__)
-
 
 @app.route('/')
 def index():
@@ -14,9 +12,12 @@ def index():
 @app.route('/scrape', methods=['GET','POST'])
 def scrape():
     if request.method == 'POST':
-        if('name' in request.form):
-            if(request.form['name']):
-                return request.form['name']
+        if('names' in request.form):
+            if(request.form['names']):
+                names = request.form['names'].split(',')
+                print(names)
+                data = rmp_spider_run.get_info(names);
+                return jsonify(data)
         else:
             return abort(404)
     else:

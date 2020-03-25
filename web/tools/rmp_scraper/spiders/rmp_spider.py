@@ -1,8 +1,17 @@
 import json
 import scrapy
-import rmp_scraper.spiders.rmp_parser.url_parser as url_parser
-import rmp_scraper.spiders.rmp_parser.review_parser as review_parser
 
+from .rmp_parser import url_parser as url_parser
+from .rmp_parser import review_parser as review_parser
+
+
+def write_json(info, path):
+    '''
+        Write teacher's info to a json file
+    '''
+    filename = path
+    with open(filename, 'w') as f:
+        f.write(json.dumps(info, indent=4))
 
 class RMPSpider(scrapy.Spider):
     name = "rmp"
@@ -46,8 +55,5 @@ class RMPSpider(scrapy.Spider):
         teacher_info['header'] = review_parser.parse_header(response)
         teacher_info['reviews'] = review_parser.parse_review(response)
 
-        filename = f"out/rmp_{teacher_info['header']['last'].lower()}_{teacher_info['header']['first'].lower()}.json"
-        self.count += 1
-        with open(filename, 'w') as f:
-            f.write(json.dumps(teacher_info, indent=4))
-        self.log('Saved file %s' % filename)
+        # write_json(teacher_info)
+        yield teacher_info
