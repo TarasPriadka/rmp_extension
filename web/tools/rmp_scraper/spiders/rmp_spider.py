@@ -1,15 +1,23 @@
 import json
 import scrapy
-import rmp_scraper.spiders.rmp_parser as parser
+import rmp_scraper.spiders.rmp_parser.url_parser as url_parser
+import rmp_scraper.spiders.rmp_parser.review_parser as review_parser
 
 
 class RMPSpider(scrapy.Spider):
     name = "rmp"
+    names = []
     count = 0
+
+    def __init__(self,*args, **kwargs):
+        super(RMPSpider, self).__init__(*args, **kwargs)
+        for a in args:
+            self.names.append(a)
+
+
     def start_requests(self):
-        names = ["Manish Goel"]
-        for name in names:
-            url = parser.url_parser.create_rmp_url(name,'De Anza')
+        for name in self.names[0]:
+            url = url_parser.create_rmp_url(name,'De Anza')
             yield scrapy.Request(url=url, callback=self.parseRMP)
 
 
@@ -27,7 +35,7 @@ class RMPSpider(scrapy.Spider):
         links = [url if 'ratemyprofessor' in url else '' for url in links]
         links = list(filter(lambda i: i != '' and 'ShowRatings' in i, links))
         for link in links:
-            url = parser.url_parser.reconstruct_url(link)
+            url = url_parser.reconstruct_url(link)
             yield scrapy.Request(url, callback=self.parse_teachers)
 
 
@@ -35,8 +43,8 @@ class RMPSpider(scrapy.Spider):
         # Header
         teacher_info = {}
         print("RESPONSE: ", response)
-        teacher_info['header'] = parser.review_parser.parse_header(response)
-        teacher_info['reviews'] = parser.review_parser.parse_review(response)
+        teacher_info['header'] = review_parser.parse_header(response)
+        teacher_info['reviews'] = review_parser.parse_review(response)
 
         filename = f"out/rmp_{teacher_info['header']['last'].lower()}_{teacher_info['header']['first'].lower()}.json"
         self.count += 1
