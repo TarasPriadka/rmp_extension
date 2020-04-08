@@ -34,7 +34,7 @@ class RMPSpider(scrapy.Spider):
             urls = response.xpath(
                 "//body//ul[contains(@class,'listing')]//@href").getall()
 
-            urls = ["https://www.ratemyprofessors.com/" + url for url in urls]
+            urls = ["https://www.ratemyprofessors.com" + url for url in urls]
             for url in urls:
                 yield scrapy.Request(url, callback=self.parse_teachers)
 
