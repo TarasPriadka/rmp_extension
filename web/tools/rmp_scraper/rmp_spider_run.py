@@ -14,6 +14,12 @@ from twisted.internet import reactor
 from .spiders.rmp_spider import RMPSpider, write_json
 
 def get_info(names):
+    '''
+    This is the main communication module with the database
+    Params: names - names to find
+
+    Search text database for the teacher's name, and if it doesn't exist, invoke scraper
+    '''
     dne = []
     results = {}
     for name in names:
@@ -33,46 +39,51 @@ def get_info(names):
             path = f"tools/out/rmp_{'_'.join(dne[i].lower().split())}.json"
             write_json(result,path)
 
-    print(results)
-
     return results
 
 
 def scrape_info(names):
     '''
-        Scrape rmp for the names in the list
+        Invoke spider with the following names
     '''
 
     return run_spider(RMPSpider(names))
 
 
 def run_spider(spider):
-    out = []
-    def f(q):
+
+    def start_spider(error_queue, response_queue):
+        '''
+        Anonymous method to create an invoke spider with a new reactor
+        Params: error_queue - queue to append error to
+                response_queue - queue to append the results of the response
+        '''
+
         try:
             results = []
+
             def crawler_results(signal, sender, item, response, spider):
                 results.append(item)
             dispatcher.connect(crawler_results, signal=signals.item_passed)
-            
+
             runner = CrawlerRunner()
             deferred = runner.crawl(spider)
             deferred.addBoth(lambda _: reactor.stop())
             reactor.run()
-            out.append(results)
-            # print(results)
-            q.put(None)
+            response_queue.put(results)
+            error_queue.put(None)
         except Exception as e:
-            q.put(e)
+            error_queue.put(e)
 
-    q = Queue()
-    p = Process(target=f, args=(q,))
-    p.start()
-    result = q.get()
-    p.join()
+    error_queue = Queue()
+    response_queue = Queue()
+    process = Process(target=start_spider, args=(error_queue, response_queue))
+    process.start()
+    result = response_queue.get()
+    errors = error_queue.get()
+    process.join()
 
-    if result is not None:
-        raise result
-    
-    # print(out)c
-    return out
+    if errors is not None:
+        raise errors
+
+    return result
