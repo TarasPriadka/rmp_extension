@@ -7,4 +7,21 @@ website. Simply install the application and compare the teachers on your portal,
 
 ## Deployment
 
-*IN PROGRESS*
+### To start Flask server run the following:
+```
+cd web
+export FLASK_APP=app.py
+export FLASK_ENV=development
+flask run
+```
+
+### UI:
+To launch React webpage:
+- `npm start`
+
+To deploy as a web extension:
+- `npm run build`
+This will dump all of the files into dump
+
+Open your browser of preference and go to the settings where you can import extensions.
+Go to build and 
