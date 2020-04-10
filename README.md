@@ -17,11 +17,11 @@ flask run
 
 ### UI:
 To launch React webpage:
-- `npm start`
+`npm start`
 
 To deploy as a web extension:
-- `npm run build`
-This will dump all of the files into dump
+`npm run build`
+This will dump all of the files into `build` folder
 
 Open your browser of preference and go to the settings where you can import extensions.
-Go to build and 
+Import the build folder by selecting any file.
