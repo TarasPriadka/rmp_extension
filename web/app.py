@@ -14,12 +14,11 @@ def index():
 @app.route('/scrape', methods=['GET','POST'])
 def scrape():
     if request.method == 'POST':
-        if('names' in request.form):
-            if(request.form['names']):
-                names = request.form['names']
-                names = names.split(',')
-                data = rmp_spider_run.get_info(names);
-                return jsonify({'status': 'ok', 'data': data})  # ,'data':data
+        if 'names' in request.form and request.form['names']: # if field names exists in request form and if it is not NULL
+            names = request.form['names']
+            names = names.split(',')
+            data = rmp_spider_run.get_info(names);
+            return jsonify({'status': 'ok', 'data': data})  # ,'data':data
         else:
 
             return abort(404)
