@@ -13,6 +13,10 @@ from twisted.internet import reactor
 
 from .spiders.rmp_spider import RMPSpider, write_json
 
+def same_name(first, last, full):
+    return first.lower() in full.lower() and last.lower() in full.lower()
+
+
 def get_info(names):
     '''
     This is the main communication module with the database
@@ -22,10 +26,29 @@ def get_info(names):
     '''
     dne = []
     results = {}
+    files_path = '/mnt/c/Users/taras/OneDrive/Documents/Code/rate-profs/web/tools/out'
+    files = os.listdir(files_path)
+
+    names_exist = []
+    for f in files:
+        names_exist.append({'name' : ' '.join(f[:-5].split('_')[1:]), 'path': f})
+
     for name in names:
         results[name] = []
-        path = f"tools/out/rmp_{'_'.join(name.lower().split())}.json"
-        if not os.path.exists(path):
+        path = 'dne'
+
+        for e_name in names_exist:
+            match = True
+            for piece in name.split():
+                if piece.lower() in e_name['name']:
+                    continue
+                else:
+                    match = False
+                    break
+            if match:
+                path = files_path + '/' + e_name['path']
+
+        if path == 'dne':
             dne.append(name)
         else:
             with open(path,'r') as f:
@@ -33,11 +56,17 @@ def get_info(names):
 
     if(len(dne) > 0):
         temp_res = scrape_info(dne)
-        for i,result in enumerate(temp_res):
-            
-            results[dne[i]].append(result)
-            path = f"tools/out/rmp_{'_'.join(dne[i].lower().split())}.json"
-            write_json(result,path)
+        for name in dne:
+            for i in range(len(temp_res)):
+                if same_name(temp_res[i]['header']['first'], temp_res[i]['header']['last'], name):
+                    results[name].append(temp_res[i])
+                    break
+        for res in temp_res:
+            first = res['header']['first']
+            last = res['header']['last']
+            path = f"tools/out/rmp_{'_'.join([last.lower(), first.lower()])}.json"
+            write_json(temp_res[i], path)
+    
 
     return results
 
@@ -85,5 +114,7 @@ def run_spider(spider):
 
     if errors is not None:
         raise errors
+    
+    # print(result)
 
     return result
