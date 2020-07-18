@@ -14,18 +14,19 @@ export const DynamicFields = (props) => {
     };
 
     return (
-        <Form name="dynamic_form_item" className='teacherForm m-4' onFinish={onFinish}>
-            <Form.List className="teacherList" name="names">
+        <Form name="dynamic_form_item" className='teacherForm m-4 app-element' onFinish={onFinish}>
+            <Form.List className="teacherList app-element" name="names">
                 {(fields, { add, remove }) => {
                     return (
                         <div>
                             {fields.map((field, index) => (
                                 <Form.Item
-                                    className='teacherField'
+                                    className='teacherField app-element'
                                     required={false}
                                     key={field.key}
                                 >
                                     <Form.Item
+                                        className="app-element"
                                         {...field}
                                         validateTrigger={['onChange', 'onBlur']}
                                         rules={[
@@ -37,10 +38,10 @@ export const DynamicFields = (props) => {
                                         ]}
                                         noStyle
                                     >
-                                        <Input placeholder="teacher's name" style={{ width: '90%', marginRight: 8 }} />
+                                        <Input className="app-element" placeholder="teacher's name" style={{ width: '90%', marginRight: 8 }} />
                                     </Form.Item>         
                                     <MinusCircleOutlined
-                                        className="dynamic-delete-button"
+                                        className="dynamic-delete-button app-element"
                                         onClick={() => {
                                             remove(field.name);
                                         }}
@@ -50,7 +51,7 @@ export const DynamicFields = (props) => {
                             <Form.Item>
                                 <Button
                                     type="dashed"
-                                    className="teacherAdd"
+                                    className="teacherAdd app-element"
                                     style={{ width: '100%'}}
                                     onClick={() => {
                                         add();
@@ -64,8 +65,8 @@ export const DynamicFields = (props) => {
                 }}
             </Form.List>
 
-            <Form.Item className='teacherSubmitField'>
-                <Button type="primary" className='teacherSubmitButton' htmlType="submit">
+            <Form.Item className='teacherSubmitField app-element'>
+                <Button type="primary" className='teacherSubmitButton app-element' htmlType="submit">
                     Submit
         </Button>
             </Form.Item>

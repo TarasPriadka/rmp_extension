@@ -1,28 +1,40 @@
-// Example POST method implementation:
-export async function postData(url = '', data) {
-    // Default options are marked with *
-    const headers = new Headers();
-    headers.append('Access-Control-Allow-Origin', '*');
-    
-    fetch(url,{
-        method: 'POST',
-        mode: 'no-cors',
-        body:data
-    }).then(r=>{console.log(r);});
+export function getElementXPath(element) {
+    if (element && element.id)
+        return '//*[@id="' + element.id + '"]';
+    else
+        return getElementTreeXPath(element);
+};
 
-    // const response = await fetch(url, {
-    //     method: 'POST', // *GET, POST, PUT, DELETE, etc.
-    //     mode: 'no-cors', // no-cors, *cors, same-origin
-    //     // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    //     // credentials: 'same-origin', // include, *same-origin, omit
-    //     // headers: {
-    //     //     // 'Content-Type': 'application/json'
-    //         // 'Access-Control-Allow-Origin': '*'
-    //     //     // 'Content-Type': 'application/x-www-form-urlencoded',
-    //     // },
-    //     // redirect: 'follow', // manual, *follow, error
-    //     // referrerPolicy: 'no-referrer', // no-referrer, *client
-    //     body: data // body data type must match "Content-Type" header
-    // });
-    return await response; // parses JSON response into native JavaScript objects
-}
+function getElementTreeXPath(element) {
+    var paths = [];  // Use nodeName (instead of localName) 
+    // so namespace prefix is included (if any).
+    for (; element && element.nodeType === Node.ELEMENT_NODE;
+        element = element.parentNode) {
+        var index = 0;
+        var hasFollowingSiblings = false;
+        for (var sibling = element.previousSibling; sibling;
+            sibling = sibling.previousSibling) {
+            // Ignore document type declaration.
+            if (sibling.nodeType === Node.DOCUMENT_TYPE_NODE)
+                continue;
+
+            if (sibling.nodeName === element.nodeName)
+                ++index;
+        }
+
+        for (sibling = element.nextSibling;
+            sibling && !hasFollowingSiblings;
+            sibling = sibling.nextSibling) {
+            if (sibling.nodeName === element.nodeName)
+                hasFollowingSiblings = true;
+        }
+
+        var tagName = (element.prefix ? element.prefix + ":" : "")
+            + element.localName;
+        var pathIndex = (index || hasFollowingSiblings ? "["
+            + (index + 1) + "]" : "");
+        paths.splice(0, 0, tagName + pathIndex);
+    }
+
+    return paths.length ? "/" + paths.join("/") : null;
+};
