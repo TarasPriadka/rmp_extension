@@ -2,15 +2,17 @@ import logging
 
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-from tools.rmp_scraper.rmp_spider_run import get_info
 
-log = logging.getLogger(__name__)
-log.setLevel('DEBUG')
+from src.scraper.scraper_wrapper import ScraperWrapper
+# from src.logger.logging_utils import get_logger
+
+# log = get_logger()
+# log.setLevel('DEBUG')
 
 app = Flask(__name__)
 CORS(app, resources={r"/scrape": {"origins": "*"}})
-app.logger
 
+log = app.logger
 
 @app.route('/')
 def index():
@@ -24,10 +26,9 @@ def scrape():
         if 'names' in request.form and request.form['names']: # if field names exists in request form and if it is not NULL
             names = request.form['names']
             names = names.split(',')
-            # print(app.logger)
             log.info(f"Got names to scrape: {names}")
-            # data = get_info(names);
-            data = {}
+            scraper = ScraperWrapper(app)
+            data = scraper.scrape(names)
             out_request = jsonify({'status': 'ok', 'data': data})
             log.debug(f"Returning request: {out_request}")
             return out_request

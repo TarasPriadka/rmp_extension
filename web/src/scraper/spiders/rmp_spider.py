@@ -1,9 +1,11 @@
 import json
 import scrapy
+import logging
 
 from .rmp_parser import url_parser as url_parser
 from .rmp_parser import review_parser as review_parser
 
+log = logging.getLogger(__name__)
 
 def write_json(info, path):
     '''
@@ -22,18 +24,21 @@ class RMPSpider(scrapy.Spider):
         super(RMPSpider, self).__init__(*args, **kwargs)
         for a in args:
             self.names.append(a)
+        # log.debug("Initialized RMP spider...")
+        print('Initialized RMP spider...')
 
 
     def start_requests(self):
         for name in self.names[0]:
             url = url_parser.create_rmp_url(name,'De Anza')
+            print(f"Parsing url: {url}")
             yield scrapy.Request(url=url, callback=self.parseRMP)
 
 
     def parseRMP(self, response):
             urls = response.xpath(
                 "//body//ul[contains(@class,'listing')]//@href").getall()
-
+            print("Got response with urls: ",urls)
             urls = ["https://www.ratemyprofessors.com" + url for url in urls]
             for url in urls:
                 yield scrapy.Request(url, callback=self.parse_teachers)
@@ -54,6 +59,7 @@ class RMPSpider(scrapy.Spider):
         print("RESPONSE: ", response)
         teacher_info['header'] = review_parser.parse_header(response)
         teacher_info['reviews'] = review_parser.parse_review(response)
-
+        # print("Got teacher info: ", teacher_info)
         # write_json(teacher_info)
         yield teacher_info
+        
