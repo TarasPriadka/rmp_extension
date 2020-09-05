@@ -1,8 +1,9 @@
 import json
-import scrapy
+import logging
 import os.path
 from multiprocessing import Process, Queue
 
+import scrapy
 from scrapy.crawler import CrawlerProcess, CrawlerRunner
 from scrapy import signals
 from scrapy.utils.project import get_project_settings
@@ -13,9 +14,10 @@ from twisted.internet import reactor
 
 from .spiders.rmp_spider import RMPSpider, write_json
 
+log = logging.getLogger(__name__)
+
 def same_name(first, last, full):
     return first.lower() in full.lower() and last.lower() in full.lower()
-
 
 def get_info(names):
     '''
