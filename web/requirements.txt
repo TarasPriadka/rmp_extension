@@ -1,3 +1,4 @@
 flask
 scrapy
 flask-cors
+pyyaml
