@@ -28,3 +28,6 @@ __pycache__
 *.json
 __pycache__
 *.pyc
+
+*.db
+*.jl
