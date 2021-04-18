@@ -11,46 +11,34 @@ from rmp.models.models import Teacher
 
 log = logging.getLogger(__name__)
 
-def write_json(info, path):
-    '''
-        Write teacher's info to a json file
-    '''
-    filename = path
-    with open(filename, 'w') as f:
-        f.write(json.dumps(info, indent=4))
 
 class RMPSpider(scrapy.Spider):
     name = "rmp"
     names = []
     count = 0
 
-    def __init__(self,*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(RMPSpider, self).__init__(*args, **kwargs)
-        # for a in args:
-            # self.names.append(a)
-        
+        self.sql = SqlConnector(kwargs['db_path'], kwargs['table_name'])
         self.names = ["Manish Goel"]
         # log.debug("Initialized RMP spider...")
         print('Initialized RMP spider...')
 
-
     def start_requests(self):
         # for name in self.names[0]:
-            # url = url_parser.create_rmp_url(name,'De Anza')
-            # print(f"Parsing url: {url}")
+        # url = url_parser.create_rmp_url(name,'De Anza')
+        # print(f"Parsing url: {url}")
         # yield scrapy.Request(url=url, callback=self.parseRMP)
         yield scrapy.Request('https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1836438', callback=self.parse_teachers)
 
-
     def parseRMP(self, response):
-            # urls = response.xpath(
-                # "//body//ul[contains(@class,'listing')]//@href").getall()
-            # print("Got response with urls: ",urls)
-            # urls = ["https://www.ratemyprofessors.com" + url for url in urls]
-            urls = ['https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1836438']
-            for url in urls:
-                yield scrapy.Request(url, callback=self.parse_teachers)
-
+        # urls = response.xpath(
+        # "//body//ul[contains(@class,'listing')]//@href").getall()
+        # print("Got response with urls: ",urls)
+        # urls = ["https://www.ratemyprofessors.com" + url for url in urls]
+        urls = ['https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1836438']
+        for url in urls:
+            yield scrapy.Request(url, callback=self.parse_teachers)
 
     def parseGoogle(self, response):
         links = response.xpath("//body/div//@href").getall()
@@ -59,7 +47,6 @@ class RMPSpider(scrapy.Spider):
         for link in links:
             url = url_parser.reconstruct_url(link)
             yield scrapy.Request(url, callback=self.parse_teachers)
-
 
     def parse_teachers(self, response):
         # Header
@@ -72,6 +59,6 @@ class RMPSpider(scrapy.Spider):
         pprint(teacher_info)
 
         teacher = Teacher.parse_dict(teacher_info)
+        self.sql.insert(teacher)
 
         yield teacher
-        
