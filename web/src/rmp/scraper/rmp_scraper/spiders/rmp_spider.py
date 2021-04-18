@@ -1,9 +1,13 @@
 import json
 import scrapy
 import logging
+from pprint import pprint
 
 from .rmp_parser import url_parser as url_parser
 from .rmp_parser import review_parser as review_parser
+
+from rmp.utils.sqlite.database import SqlConnector
+from rmp.models.models import Teacher
 
 log = logging.getLogger(__name__)
 
@@ -22,24 +26,28 @@ class RMPSpider(scrapy.Spider):
 
     def __init__(self,*args, **kwargs):
         super(RMPSpider, self).__init__(*args, **kwargs)
-        for a in args:
-            self.names.append(a)
+        # for a in args:
+            # self.names.append(a)
+        
+        self.names = ["Manish Goel"]
         # log.debug("Initialized RMP spider...")
         print('Initialized RMP spider...')
 
 
     def start_requests(self):
-        for name in self.names[0]:
-            url = url_parser.create_rmp_url(name,'De Anza')
-            print(f"Parsing url: {url}")
-            yield scrapy.Request(url=url, callback=self.parseRMP)
+        # for name in self.names[0]:
+            # url = url_parser.create_rmp_url(name,'De Anza')
+            # print(f"Parsing url: {url}")
+        # yield scrapy.Request(url=url, callback=self.parseRMP)
+        yield scrapy.Request('https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1836438', callback=self.parse_teachers)
 
 
     def parseRMP(self, response):
-            urls = response.xpath(
-                "//body//ul[contains(@class,'listing')]//@href").getall()
-            print("Got response with urls: ",urls)
-            urls = ["https://www.ratemyprofessors.com" + url for url in urls]
+            # urls = response.xpath(
+                # "//body//ul[contains(@class,'listing')]//@href").getall()
+            # print("Got response with urls: ",urls)
+            # urls = ["https://www.ratemyprofessors.com" + url for url in urls]
+            urls = ['https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1836438']
             for url in urls:
                 yield scrapy.Request(url, callback=self.parse_teachers)
 
@@ -61,5 +69,9 @@ class RMPSpider(scrapy.Spider):
         teacher_info['reviews'] = review_parser.parse_review(response)
         # print("Got teacher info: ", teacher_info)
         # write_json(teacher_info)
-        yield teacher_info
+        pprint(teacher_info)
+
+        teacher = Teacher.parse_dict(teacher_info)
+
+        yield teacher
         
