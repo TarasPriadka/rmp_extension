@@ -1,9 +1,11 @@
-import json
+import logging
 import sqlite3
 
 from typing import List
 
 from rmp.models.models import Teacher, TeacherMeta, Review, ReviewMeta
+
+logging.root.setLevel(logging.DEBUG)
 
 
 class SqlConnector:
@@ -20,10 +22,15 @@ class SqlConnector:
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
         self.table_name = table_name
+        # weirdy sql returns a list of tuples which wrap strings
+        tables = [a[0] for a in self.cursor.execute(
+            f"SELECT name FROM sqlite_master WHERE type='table';").fetchall()]
 
-    def create_teacher_table(self):
-        """Create a default blank teacher table"""
-        self._create_table(self.table_name, Teacher.FIELDS)
+        if self.table_name not in tables:
+            logging.info(
+                f'''Table name {self.table_name} doesn't exist. Creating...''')
+            self._create_table(
+                self.table_name, Teacher.FIELDS)  # creates the new table if it wasn't present
 
     def _create_table(self, table_name: str, column_name_type: List[tuple]):
         """Create table with a name and columns
@@ -59,11 +66,12 @@ class SqlConnector:
 
 if __name__ == '__main__':
     # default_teach1 = Teacher('Example', 'Teach', 2.5, 'de anza', 'cis', 10, 9, 4.0, TeacherMeta(
-        # []), [Review('cis 1', 'awesome', 'good teach', ReviewMeta(3, 3, [], [], 10, 1, 'june 1'))])
+    # []), [Review('cis 1', 'awesome', 'good teach', ReviewMeta(3, 3, [], [], 10, 1, 'june 1'))])
     # default_teach2 = Teacher('Example1', 'Teach2', 2.5, 'de anza', 'cis', 10, 9, 4.0, TeacherMeta(
-        # []), [Review('cis 1', 'awesome', 'good teach', ReviewMeta(3, 3, [], [], 10, 1, 'june 1'))])
-    sql = SqlConnector('test.db', 'teachers_de_anza')
-    # sql.create_teacher_table()
+    # []), [Review('cis 1', 'awesome', 'good teach', ReviewMeta(3, 3, [], [], 10, 1, 'june 1'))])
+
+    sql = SqlConnector(
+        '/home/taras/Documents/data/rmp/db/teachers.db', 'manish')
     # sql.insert(default_teach1)
     # sql.insert(default_teach2)
-    print(sql.get('Example','Teach'))
+    print(sql.get('Goel', 'Manish'))

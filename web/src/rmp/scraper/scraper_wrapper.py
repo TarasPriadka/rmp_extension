@@ -15,6 +15,7 @@ from twisted.internet import reactor
 from .spiders.rmp_spider import RMPSpider, write_json
 # from src.logger.logging_utils import get_logger
 
+
 class ScraperWrapper:
     def __init__(self, app):
         self.log = app.logger
@@ -38,7 +39,8 @@ class ScraperWrapper:
         log.debug(f'Printing files to {files_path}')
         names_exist = []
         for f in files:
-            names_exist.append({'name' : ' '.join(f[:-5].split('_')[1:]), 'path': f})
+            names_exist.append(
+                {'name': ' '.join(f[:-5].split('_')[1:]), 'path': f})
 
         for name in names:
             results[name] = []
@@ -59,15 +61,16 @@ class ScraperWrapper:
                 dne.append(name)
             else:
 
-                with open(path,'r') as f:
+                with open(path, 'r') as f:
                     results[name].append(json.load(f))
-        
+
         existing_names = set(dne).intersection(set(names))
         if len(existing_names) > 0:
             log.debug(f"Found {existing_names} in the back...")
 
         if(len(dne) > 0):
-            log.debug(f"Did not find [{dne}] in the back. Starting scraping...")
+            log.debug(
+                f"Did not find [{dne}] in the back. Starting scraping...")
             scrape_results = self.scrape_info(dne)
             for name in dne:
                 for result in scrape_results:
@@ -79,17 +82,15 @@ class ScraperWrapper:
                 last = result['header']['last']
                 path = f"tools/out/rmp_{'_'.join([last.lower(), first.lower()])}.json"
                 write_json(result, path)
-        
-        return results
 
+        return results
 
     def scrape_info(self, names):
         '''
             Invoke spider with the following names
         '''
 
-        return self.run_spider(RMPSpider(names,logger = self.log))
-
+        return self.run_spider(RMPSpider(names, logger=self.log))
 
     def run_spider(self, spider):
 
@@ -102,6 +103,7 @@ class ScraperWrapper:
 
             try:
                 results = []
+
                 def crawler_results(signal, sender, item, response, spider):
                     results.append(item)
                 dispatcher.connect(crawler_results, signal=signals.item_passed)
@@ -117,7 +119,8 @@ class ScraperWrapper:
 
         error_queue = Queue()
         response_queue = Queue()
-        process = Process(target=start_spider, args=(error_queue, response_queue))
+        process = Process(target=start_spider, args=(
+            error_queue, response_queue))
         process.start()
         result = response_queue.get()
         errors = error_queue.get()
@@ -125,7 +128,10 @@ class ScraperWrapper:
 
         if errors is not None:
             raise errors
-        
+
         # print(result)
 
         return result
+
+if __name__ == "__main__":
+    scraper = ScraperWrapper()
