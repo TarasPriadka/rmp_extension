@@ -92,7 +92,7 @@ class Teacher:
                                   'comment': teacher_dict['header']['mhl']['comment'],
                                   'upvotes': teacher_dict['header']['mhl']['upvotes'],
                                   'downvotes': teacher_dict['header']['mhl']['downvotes'],
-                                  }
+                                  } if len(teacher_dict['header']['mhl'])!=0 else {}
 
         reviews: List[Review] = []
         for c in teacher_dict['reviews']:

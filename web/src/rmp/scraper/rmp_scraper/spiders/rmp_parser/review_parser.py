@@ -1,5 +1,7 @@
 from lxml import html
 
+from rmp.utils.general import isfloat
+
 def parse_header(response):
     header = {}
     name_line = response.xpath(
@@ -11,27 +13,38 @@ def parse_header(response):
 
     avggrade_line = response.xpath(
         "//div[contains(@class,'Wrapper')]/div[1]/div[1]/div[1]//text()").getall()
-    header['grade'] = float(avggrade_line[0])
-    header['total_ratings'] = int(avggrade_line[5])
+    header['grade'] = float(avggrade_line[0]) if isfloat(avggrade_line[0]) else float('nan')
+    header['total_ratings'] = int(avggrade_line[5]) if 'No ratings yet.' not in avggrade_line else 0 
 
     stats_line = response.xpath(
         "//div[contains(@class,'Wrapper')]/div[1]/div[1]/div[3]//text()").getall()
-    header['would_take_again'] = stats_line[0]
-    header['difficulty'] = float(stats_line[2])
+
+    if 'Would take again' in stats_line:
+        i = stats_line.index('Would take again') - 1 #used to find index of wta or difficulty in case one is missing
+        header['would_take_again'] = stats_line[i] 
+    else:
+        header['would_take_again'] = float('nan') 
+
+    if 'Level of Difficulty' in stats_line:
+        i = stats_line.index('Level of Difficulty') - 1 #used to find index of wta or difficulty in case one is missing
+        header['difficulty'] = stats_line[i] 
+    else:
+        header['difficulty'] = float('nan') 
 
     tags_line = response.xpath(
         "//div[contains(@class,'Wrapper')]/div[1]/div[1]/div[5]//text()").getall()
-    header['tags'] = tags_line[3:]
+    header['tags'] = tags_line[3:] if len(tags_line)>4 else []
 
     most_helpful_line = response.xpath(
         "//div[contains(@class,'Wrapper')]/div[1]/div[2]/div[1]//text()").getall()
 
     header['mhl'] = {}
-    header['mhl']['class'] = most_helpful_line[3]
-    header['mhl']['date'] = most_helpful_line[4]
-    header['mhl']['comment'] = most_helpful_line[5]
-    header['mhl']['upvotes'] = int(most_helpful_line[7])
-    header['mhl']['downvotes'] = int(most_helpful_line[9])
+    if 'Be the first to rate Professor ' not in most_helpful_line and 'Bummer, Professor ' not in most_helpful_line:
+        header['mhl']['class'] = most_helpful_line[3]
+        header['mhl']['date'] = most_helpful_line[4]
+        header['mhl']['comment'] = most_helpful_line[5]
+        header['mhl']['upvotes'] = int(most_helpful_line[7])
+        header['mhl']['downvotes'] = int(most_helpful_line[9])
     return header
 
 def parse_review_header(review):
@@ -66,8 +79,12 @@ def parse_footer(review):
             'downvotes': review[3]  }
 
 def parse_review(response):
-    review = response.xpath("//ul[contains(@id,'ratingsList')]").getall()[0]
-    tree = html.fromstring(review)
+    review = response.xpath("//ul[contains(@id,'ratingsList')]").getall()
+    
+    if len(review)==0:
+        return []
+
+    tree = html.fromstring(review[0])
     comments = tree.xpath("//li")
     reviews = []
     for comment in comments:

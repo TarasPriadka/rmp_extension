@@ -2,6 +2,13 @@ import os
 from pathlib import Path
 import json
 
+def isfloat(value):
+  try:
+    float(value)
+    return True
+  except ValueError:
+    return False
+
 def setup_dataroot():
     dataroot = os.environ['DATAROOT']
     Path(dataroot).mkdir(parents=True, exist_ok=True)
