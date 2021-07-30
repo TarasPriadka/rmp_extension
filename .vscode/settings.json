@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\taras\\anaconda3\\python.exe",
+    "python.pythonPath": "/home/taras/anaconda3/envs/rmp/bin/python",
     "python.formatting.provider": "black"
 }
