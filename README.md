@@ -7,7 +7,12 @@ website. Simply install the application and compare the teachers on your portal.
 
 ## Deployment
 
-### To start Flask server run the following:
+### Setup your dataroot paths
+```
+python app/src/rmp/utils/general.py
+```
+
+### To start Flask server run the following (currently under construction):
 ```
 cd web
 export FLASK_APP=app.py
